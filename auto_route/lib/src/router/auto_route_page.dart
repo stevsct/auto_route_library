@@ -84,10 +84,10 @@ class AutoRoutePage<T> extends Page<T> {
       return _PageBasedMaterialPageRoute<T>(page: this);
     } else if (type is CupertinoRouteType) {
       return _PageBasedCupertinoPageRoute<T>(page: this, title: title);
-    } else if (type is CustomRouteType) {
+    } else if (type is CustomRouteType<T>) {
       final result = buildPage(context);
       if (type.customRouteBuilder != null) {
-        return type.customRouteBuilder!(context, result, this) as Route<T>;
+        return type.customRouteBuilder!(context, result, this);
       }
       return _CustomPageBasedPageRouteBuilder<T>(page: this, routeType: type);
     } else if (type is AdaptiveRouteType) {
@@ -117,23 +117,6 @@ class _PageBasedMaterialPageRoute<T> extends PageRoute<T>
   }) : super(settings: page);
 
   AutoRoutePage get _page => settings as AutoRoutePage;
-
-  @override
-  bool get popGestureEnabled {
-    /// This fixes the issue of nested navigators back-gesture
-    /// It prevents back-gesture on parent navigator if sub-router
-    /// can pop
-    if (super.popGestureEnabled) {
-      final router = _page.routeData.router;
-      final topMostRouter = router.topMostRouter();
-      return (router.isTopMost ||
-          !topMostRouter.canPop(
-            ignoreParentRoutes: true,
-            ignorePagelessRoutes: true,
-          ));
-    }
-    return false;
-  }
 
   @override
   Widget buildContent(BuildContext context) => _page.buildPage(context);
